@@ -1,0 +1,53 @@
+name: Book
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-build:
+    name: Book validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install validation dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Test content checks
+        run: python -m unittest discover -s tests
+      - name: Check Markdown and metadata
+        run: python scripts/check_content.py
+      - name: Cache mdBook
+        id: mdbook-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cargo/bin/mdbook
+          key: mdbook-${{ runner.os }}-0.5.4
+      - name: Install mdBook
+        if: steps.mdbook-cache.outputs.cache-hit != 'true'
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          cargo +stable install mdbook --version 0.5.4 --locked
+      - name: Build book
+        run: mdbook build
+      - name: Check HTML links
+        run: python scripts/check_content.py --book-dir book
