@@ -1,0 +1,17 @@
+[book]
+title = "РЕЛИКТ"
+description = "Документы из Озёрска-9"
+language = "ru"
+src = "src"
+
+[build]
+build-dir = "book"
+create-missing = false
+
+[preprocessor.relict-metadata]
+command = "python3 scripts/mdbook_metadata.py"
+after = ["links"]
+
+[output.html]
+default-theme = "coal"
+preferred-dark-theme = "coal"
