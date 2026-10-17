@@ -24,7 +24,7 @@
 
 ## Книга mdBook
 
-Для сборки нужны [Rust и Cargo](https://www.rust-lang.org/tools/install), Python 3 и [mdBook](https://rust-lang.github.io/mdBook/). Python используется для обработки редакционных метаданных, проверки статуса глав и ссылок авторского раздела; дополнительных Python-пакетов не требуется.
+Для сборки нужны [Rust и Cargo](https://www.rust-lang.org/tools/install), Python 3 и [mdBook](https://rust-lang.github.io/mdBook/). Python используется для обработки редакционных метаданных, проверки статуса глав и ссылок авторского раздела. Для окружения проверок используется [uv](https://docs.astral.sh/uv/); зависимости описаны в `pyproject.toml` и зафиксированы в `uv.lock`.
 
 Установить проверенную версию mdBook:
 
@@ -35,8 +35,9 @@ cargo install mdbook --version 0.5.4 --locked
 Из корня проекта:
 
 ```sh
-mdbook build
-mdbook serve --hostname 127.0.0.1 --port 3000
+uv sync --locked
+uv run --locked mdbook build
+uv run --locked mdbook serve --hostname 127.0.0.1 --port 3000
 ```
 
 `build` сохраняет HTML-книгу в `book/`, `serve` запускает локальный просмотр по адресу http://127.0.0.1:3000 и пересобирает книгу при изменении исходников. Папка `book/` исключена из Git. Автоматическая публикация не настроена.
@@ -80,13 +81,13 @@ book/                      # результат сборки, исключён �
 
 ### Проверки для PR
 
-Зависимости и команды полного цикла приведены в [CONTRIBUTING.md](CONTRIBUTING.md). После установки `requirements-dev.txt` выполните:
+Зависимости и команды полного цикла приведены в [CONTRIBUTING.md](CONTRIBUTING.md). После `uv sync --locked` выполните:
 
 ```sh
-python -m unittest discover -s tests
-python scripts/check_content.py
-mdbook build
-python scripts/check_content.py --book-dir book
+uv run --locked python -m unittest discover -s tests
+uv run --locked python scripts/check_content.py
+uv run --locked mdbook build
+uv run --locked python scripts/check_content.py --book-dir book
 ```
 
 GitHub Actions повторяет эти проверки для PR и ветки `main`. Они проверяют формат, метаданные и ссылки; решение о каноне принимает автор.

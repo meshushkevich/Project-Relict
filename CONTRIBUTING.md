@@ -33,20 +33,18 @@
 
 ## Проверки
 
-Нужны Python 3.10 или новее и mdBook 0.5.4. Команды выполняются из корня проекта; Python-зависимости устанавливайте в виртуальное окружение.
+Нужны [uv](https://docs.astral.sh/uv/getting-started/installation/), Rust/Cargo и mdBook 0.5.4. Команды выполняются из корня проекта. Требование к версии Python указано в `pyproject.toml`; uv может установить подходящий интерпретатор автоматически. В CI используется Python 3.12. Зависимости проверок описаны в `pyproject.toml`, точные версии зафиксированы в `uv.lock`.
 
 ```sh
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements-dev.txt
+uv sync --locked
 cargo install mdbook --version 0.5.4 --locked
-python -m unittest discover -s tests
-python scripts/check_content.py
-mdbook build
-python scripts/check_content.py --book-dir book
+uv run --locked python -m unittest discover -s tests
+uv run --locked python scripts/check_content.py
+uv run --locked mdbook build
+uv run --locked python scripts/check_content.py --book-dir book
 ```
 
-В Windows активируйте окружение командой `.venv\Scripts\Activate.ps1` в PowerShell.
+Активировать `.venv` вручную не нужно: `uv run` запускает команды в окружении проекта. Если меняете Python-зависимости, обновите `pyproject.toml`, выполните `uv lock` и включите оба файла в PR. Обычные проверки с `--locked` не обновляют lock-файл.
 
 Проверяются YAML, обязательные поля, даты, уникальность номеров, отсутствие черновиков в оглавлении и локальные ссылки. После сборки проверяются ссылки и якоря HTML-книги. CI также запускает тесты валидатора и сборку mdBook. Скрипты не оценивают литературное качество и не подтверждают соответствие канону: это проверяет автор.
 
