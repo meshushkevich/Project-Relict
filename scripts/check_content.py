@@ -12,7 +12,7 @@ from urllib.parse import unquote, urlsplit
 import yaml
 
 
-DOCUMENT_DIRS = ("Incidents", "Creatures", "Anomalies")
+DOCUMENT_DIRS = ("Chapters", "Incidents", "Creatures", "Anomalies")
 LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 FRONT_MATTER = re.compile(r"\A---\n(.*?)\n---(?:\n|$)", re.DOTALL)
 

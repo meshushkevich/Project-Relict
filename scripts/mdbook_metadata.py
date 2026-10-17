@@ -6,12 +6,12 @@ from pathlib import PurePosixPath
 import posixpath
 import re
 import sys
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, urlsplit, urlunsplit
 
 
 FRONT_MATTER = re.compile(r"\A---\n(.*?)\n---(?:\n|$)", re.DOTALL)
 CANON_STATUS = re.compile(r"^status:[ \t]*(?:canon|'canon'|\"canon\")[ \t]*(?:#.*)?$", re.MULTILINE)
-DOCUMENT_DIRS = {"Incidents", "Creatures", "Anomalies"}
+DOCUMENT_DIRS = {"Chapters", "Incidents", "Creatures", "Anomalies"}
 
 
 def chapters(items):
@@ -34,6 +34,23 @@ def appendix_links(content, path, published):
     return re.sub(r"(?<!!)\[([^\]]*)\]\(([^)]+)\)", replace, content)
 
 
+def readme_links(content, path, published):
+    """Согласовать ссылки Markdown с переименованием README стандартным index."""
+    def replace(match):
+        label, target = match.groups()
+        url = urlsplit(target)
+        if url.scheme or url.netloc or not url.path.endswith("README.md"):
+            return match[0]
+        source = posixpath.normpath((path.parent / unquote(url.path)).as_posix())
+        destination = str(PurePosixPath(source).with_name("index.md"))
+        if source not in published or destination not in published:
+            return match[0]
+        relative = posixpath.relpath(destination, path.parent.as_posix())
+        return f"[{label}]({urlunsplit(('', '', relative, url.query, url.fragment))})"
+
+    return re.sub(r"(?<!!)\[([^\]]*)\]\(([^)]+)\)", replace, content)
+
+
 def process_items(items, published):
     for item in items:
         chapter = item.get("Chapter")
@@ -49,6 +66,7 @@ def process_items(items, published):
             if not CANON_STATUS.search(metadata[1]):
                 raise ValueError(f"{path}: в читательскую книгу допускается только status: canon")
             chapter["content"] = content[metadata.end():].lstrip("\n")
+        chapter["content"] = readme_links(chapter["content"], path, published)
         if path.parts and path.parts[0] == "Spoilers":
             chapter["content"] = appendix_links(chapter["content"], path, published)
         process_items(chapter.get("sub_items", []), published)

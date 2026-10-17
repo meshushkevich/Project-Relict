@@ -1,30 +1,30 @@
 ---
 name: grilling
-description: Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
+description: "Подробно расспроси пользователя о плане, решении или идее, проверяя замысел на прочность. Применять, когда пользователь предлагает новый контент для книги"
 ---
 
-Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it.
+Последовательно расспрашивай пользователя, пока вы не придёте к общему пониманию. Представляй обсуждение как **дерево решений**: каждое решение порождает ветви зависимых от него решений.
 
-Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each question and give your recommended answer. Then wait for the user's answers before the next round.
+Обходи дерево **раундами**. **Доступные вопросы** относятся к решениям, все предпосылки которых уже определены. Их можно задать _сейчас_, не предполагая ответов, которых пользователь ещё не дал. В одном раунде задай все доступные вопросы: пронумеруй каждый и предложи рекомендуемый ответ. Прежде чем переходить к следующему раунду, дождись ответов пользователя.
 
-Format a round like so:
+Оформляй раунд так:
 
 ```
-❓ **Q1** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
+❓ **Q1** - **<тема вопроса>**: <текст вопроса; при необходимости несколько абзацев и варианты ответа>
 
-➡️ <your recommended answer>
+➡️ <рекомендуемый ответ>
 
 ---
 
-❓ **Q2** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
+❓ **Q2** - **<тема вопроса>**: <текст вопроса; при необходимости несколько абзацев и варианты ответа>
 
-➡️ <your recommended answer>
+➡️ <рекомендуемый ответ>
 ```
 
-Word each question so "yes" accepts your recommended answer.
+Формулируй каждый вопрос так, чтобы ответ «да» означал согласие с твоей рекомендацией.
 
-Each round the user answers reshapes the tree: settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
+Ответы пользователя в каждом раунде меняют дерево: принятые решения открывают доступ к вопросам, которые от них зависели. Заново определи доступные вопросы и начни следующий раунд. Если ответ на вопрос зависит от другого вопроса, ещё не решённого в текущем раунде, перенеси его в _следующий_ раунд, когда необходимые ответы будут получены.
 
-Finding _facts_ is your job, never the user's. When a frontier question needs a fact from the environment (filesystem, tools, etc.), dispatch a sub-agent to find it; don't ask the user for anything you could look up yourself. Don't block on it: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait for the sub-agent to report; ask the rest of the frontier now. The _decisions_ are the user's: put each to them and wait.
+Поиск _фактов_ лежит на тебе. Если для доступного вопроса нужны сведения из окружения, например из файловой системы или инструментов, поручи их поиск субагенту. Не спрашивай пользователя о том, что можешь выяснить самостоятельно. Не останавливай всё обсуждение на время поиска: пока субагент работает, отложи только зависящие от его результата вопросы. Остальные доступные вопросы задай сразу. _Решения_ принимает пользователь: вынеси каждое на обсуждение и дождись ответа.
 
-The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed. Do not act on it until the user confirms you have reached a shared understanding.
+Обсуждение завершено, когда доступных вопросов больше нет: все ветви дерева разобраны, скрытых допущений не осталось. Не приступай к реализации, пока пользователь не подтвердит, что вы достигли общего понимания.
